@@ -14,6 +14,8 @@ using Serilog;
 using Serilog.Events;
 
 // 非管理员且未给 --no-admin 时，这里会拉起提权副本并把 stdio 中继过去，控制权不再回来
+DpiAwareness.Enable();
+
 var elevation = ElevationHost.Run(args);
 if (elevation.Outcome == ElevationOutcome.Relayed)
 {

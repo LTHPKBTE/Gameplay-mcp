@@ -3,6 +3,8 @@ using GameMcp.Elevation;
 using GameMcp.Tools;
 using GameMcp.Windowing;
 
+DpiAwareness.Enable();
+
 var elevation = ElevationHost.Run(args);
 if (elevation.Outcome == ElevationOutcome.Relayed)
 {
