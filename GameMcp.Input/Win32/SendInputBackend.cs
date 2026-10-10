@@ -17,6 +17,7 @@ internal sealed class SendInputBackend : IInputBackend
     private readonly InputSimulator _input = new();
 
     private readonly HashSet<User32.VK> _pressed = [];
+    private readonly HashSet<MouseButton> _pressedButtons = [];
     private readonly object _pressedLock = new();
 
     public SendInputBackend(IWindowService windows, nint handle, InputOptions options)
@@ -92,10 +93,13 @@ internal sealed class SendInputBackend : IInputBackend
     public void ReleaseAll()
     {
         User32.VK[] keys;
+        MouseButton[] buttons;
         lock (_pressedLock)
         {
             keys = [.. _pressed];
+            buttons = [.. _pressedButtons];
             _pressed.Clear();
+            _pressedButtons.Clear();
         }
 
         foreach (var vk in keys)
@@ -103,10 +107,12 @@ internal sealed class SendInputBackend : IInputBackend
             EmitKey(vk, keyUp: true);
         }
 
-        // 鼠标键不走按下记录（Click 自带成对的抬起），统一补一次抬起
-        _input.Mouse.LeftButtonUp();
-        _input.Mouse.RightButtonUp();
-        _input.Mouse.MiddleButtonUp();
+        // 只抬起确实按下过的鼠标键。没有配对按下的一次孤立抬起会向光标下的窗口发出
+        // WM_CONTEXTMENU，也就是凭空弹出右键菜单，所以不能无条件补发。
+        foreach (var button in buttons)
+        {
+            Button(button, down: false);
+        }
     }
 
     public IReadOnlyList<string> PressedKeys
@@ -176,6 +182,18 @@ internal sealed class SendInputBackend : IInputBackend
 
     private void Button(MouseButton button, bool down)
     {
+        lock (_pressedLock)
+        {
+            if (down)
+            {
+                _pressedButtons.Add(button);
+            }
+            else
+            {
+                _pressedButtons.Remove(button);
+            }
+        }
+
         var mouse = _input.Mouse;
         switch (button)
         {
