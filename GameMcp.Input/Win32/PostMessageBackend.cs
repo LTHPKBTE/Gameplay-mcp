@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Text;
 using GameMcp.Windowing;
 using Vanara.PInvoke;
 
@@ -13,6 +14,25 @@ internal sealed class PostMessageBackend : IInputBackend
 {
     /// <summary>子窗口路由结果的缓存上限，超出即整体清空。</summary>
     private const int TargetCacheLimit = 512;
+
+    private const int MaxClassNameLength = 256;
+
+    private const int WsTabStop = 0x00010000;
+
+    /// <summary>典型可输入控件类名，命中即可作为键盘落点。</summary>
+    private static readonly HashSet<string> InputClasses = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Scintilla",
+        "Edit",
+        "AVL_AVView",
+    };
+
+    /// <summary>只展示、不接受键盘输入的类名，按样式筛选时排除。</summary>
+    private static readonly HashSet<string> DisplayClasses = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Static",
+        "SysHeader32",
+    };
 
     private readonly IWindowService _windows;
     private readonly InputOptions _options;
@@ -129,13 +149,15 @@ internal sealed class PostMessageBackend : IInputBackend
     private nint EnsureTarget() => _handle == nint.Zero ? throw InputException.NoTarget() : _handle;
 
     /// <summary>
-    /// 键盘消息的落点：持有焦点的子控件（Scintilla、Edit 等）在自己的 WndProc 里消费
-    /// <c>WM_CHAR</c> / <c>WM_KEYDOWN</c>，投给顶层窗口不会被转发，因此必须定位到子窗口。
-    /// 目标线程即使不是前台，其线程局部输入状态里的 <c>hwndFocus</c> 仍然保留，且该查询是只读的。
+    /// 键盘消息的落点。持有焦点的子控件在自己的 WndProc 里消费 <c>WM_CHAR</c> / <c>WM_KEYDOWN</c>，
+    /// 投给顶层窗口不会被转发到子控件。按四级顺序选：线程焦点 → 可输入类名 → <c>WS_TABSTOP</c>
+    /// → 最大可见叶子窗口；都没有就用顶层窗口本身（自绘/单窗口应用）。
     /// </summary>
     private nint KeyTarget()
     {
         var top = new HWND(EnsureTarget());
+
+        // 一级：线程局部输入状态记录的焦点控件。目标非前台时该值仍然保留，查询是只读的。
         var threadId = User32.GetWindowThreadProcessId(top, out _);
         var info = new User32.GUITHREADINFO { cbSize = (uint)Marshal.SizeOf<User32.GUITHREADINFO>() };
         if (threadId != 0 && User32.GetGUIThreadInfo(threadId, ref info))
@@ -147,40 +169,72 @@ internal sealed class PostMessageBackend : IInputBackend
             }
         }
 
-        // 拿不到焦点就退到客户区最大的可见叶子窗口；顶层窗口没有子窗口时这里返回顶层，
-        // 正好适配自绘/引擎类单窗口应用。
-        var fallback = LargestLeafChild(top);
-        return fallback.IsNull ? top.DangerousGetHandle() : fallback.DangerousGetHandle();
+        var children = VisibleChildren(top);
+        var pick = Largest(children.Where(c => IsInputClass(c.ClassName)));
+        if (pick.IsNull)
+        {
+            pick = Largest(children.Where(c => c.TabStop && !DisplayClasses.Contains(c.ClassName)));
+        }
+
+        if (pick.IsNull)
+        {
+            pick = Largest(children.Where(c => c.Leaf));
+        }
+
+        return pick.IsNull ? top.DangerousGetHandle() : pick.DangerousGetHandle();
     }
 
-    /// <summary>回退策略：客户区面积最大的可见叶子窗口（工具栏、状态栏通常比编辑区小）。</summary>
-    private static HWND LargestLeafChild(HWND top)
+    /// <summary>一次枚举收集所有可见且启用的子窗口，供三级回退共用。</summary>
+    private static List<ChildWindow> VisibleChildren(HWND top)
     {
-        var best = HWND.NULL;
-        var bestArea = 0L;
+        var list = new List<ChildWindow>();
 
         User32.EnumChildWindows(top, (child, _) =>
         {
-            if (!User32.IsWindowVisible(child) || !User32.GetWindow(child, User32.GetWindowCmd.GW_CHILD).IsNull)
+            if (!User32.IsWindowVisible(child) || !User32.IsWindowEnabled(child))
             {
                 return true;
             }
 
-            if (User32.GetClientRect(child, out var rect))
-            {
-                var area = (long)rect.Width * rect.Height;
-                if (area > bestArea)
-                {
-                    bestArea = area;
-                    best = child;
-                }
-            }
+            User32.GetClientRect(child, out var rect);
+            var buffer = new StringBuilder(MaxClassNameLength);
+            var length = User32.GetClassName(child, buffer, buffer.Capacity);
+            var style = User32.GetWindowLong(child, User32.WindowLongFlags.GWL_STYLE);
+
+            list.Add(new ChildWindow(
+                child,
+                length > 0 ? buffer.ToString() : string.Empty,
+                (style & WsTabStop) != 0,
+                User32.GetWindow(child, User32.GetWindowCmd.GW_CHILD).IsNull,
+                (long)rect.Width * rect.Height));
 
             return true;
         }, IntPtr.Zero);
 
+        return list;
+    }
+
+    private static HWND Largest(IEnumerable<ChildWindow> items)
+    {
+        var best = HWND.NULL;
+        var bestArea = -1L;
+        foreach (var item in items)
+        {
+            if (item.Area > bestArea)
+            {
+                bestArea = item.Area;
+                best = item.Handle;
+            }
+        }
+
         return best;
     }
+
+    private static bool IsInputClass(string className) =>
+        InputClasses.Contains(className)
+        || className.StartsWith("RichEdit", StringComparison.OrdinalIgnoreCase);
+
+    private readonly record struct ChildWindow(HWND Handle, string ClassName, bool TabStop, bool Leaf, long Area);
 
     /// <summary>
     /// 目标非前台时补发 <c>WM_ACTIVATE</c>。<c>WM_ACTIVATE</c> 是顶层窗口专属通知，子控件不处理它，

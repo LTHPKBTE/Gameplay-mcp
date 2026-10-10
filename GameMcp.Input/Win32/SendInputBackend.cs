@@ -107,8 +107,8 @@ internal sealed class SendInputBackend : IInputBackend
             EmitKey(vk, keyUp: true);
         }
 
-        // 只抬起确实按下过的鼠标键。没有配对按下的一次孤立抬起会向光标下的窗口发出
-        // WM_CONTEXTMENU，也就是凭空弹出右键菜单，所以不能无条件补发。
+        // 只抬起确实按下过的鼠标键。没有配对按下的一次孤立抬起会让光标下的窗口收到
+        // WM_CONTEXTMENU（实测），即凭空弹出右键菜单。
         foreach (var button in buttons)
         {
             Button(button, down: false);

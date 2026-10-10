@@ -133,9 +133,8 @@ public sealed class WindowService : IWindowService
             User32.ShowWindow(hwnd, ShowWindowCommand.SW_RESTORE);
         }
 
-        // 不再调 BringWindowToTop：SetForegroundWindow 成功时它已经完成置顶，
-        // 失败时它也无权越过前台锁定；而跨线程调用它会让内核向目标线程同步发
-        // WM_WINDOWPOSCHANGING，目标忙时调用方会永久阻塞。
+        // 只用 SetForegroundWindow。实测 BringWindowToTop 跨线程调用时会永久阻塞调用方；
+        // 它原先带来的成功大多来自这段往返耗时恰好越过了 ForegroundLockTimeout，重试可等效。
         for (var attempt = 0; attempt < FocusAttempts; attempt++)
         {
             if (attempt > 0)
