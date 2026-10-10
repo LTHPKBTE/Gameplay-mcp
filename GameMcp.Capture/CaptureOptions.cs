@@ -9,6 +9,7 @@ public sealed class CaptureOptions
 
     public CaptureImageFormat Format { get; set; } = CaptureImageFormat.Png;
 
+    /// <summary>WebP 质量：<c>1..100</c> 有损，<c>大于 100</c> 无损。</summary>
     public int WebPQuality { get; set; } = 90;
 
     /// <summary>帧池最短更新间隔（毫秒），0 表示不限制。</summary>

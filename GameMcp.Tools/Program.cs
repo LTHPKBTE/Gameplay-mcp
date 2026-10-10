@@ -64,7 +64,7 @@ static int Usage()
           --mode <名称>          采集后端，默认 Auto（按显示器高级色彩状态选）
           --canvas 1920          基准画布长边，0 表示不缩放
           --format png|webp      落盘格式，默认 png
-          --quality 90           WebP 质量
+          --quality 90           WebP 质量，1-100 有损，大于 100 无损
           --interval 100         帧间隔毫秒
           --duration 0           持续秒数；0 表示采一帧
           --count 0              最大帧数；0 表示不限

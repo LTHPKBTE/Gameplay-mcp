@@ -176,7 +176,7 @@ public sealed record CaptureState(
     int CanvasMax,
     string Format,
 
-    // 默认的 camelCase 策略会把它写成 webPQuality
+    // 默认的 camelCase 策略会把它写成 webPQuality；1..100 有损，大于 100 无损
     [property: JsonPropertyName("webpQuality")] int WebPQuality,
     long Frames,
     long EmptyFrames,
