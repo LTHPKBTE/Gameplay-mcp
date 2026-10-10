@@ -109,6 +109,17 @@ internal sealed class SendInputBackend : IInputBackend
         _input.Mouse.MiddleButtonUp();
     }
 
+    public IReadOnlyList<string> PressedKeys
+    {
+        get
+        {
+            lock (_pressedLock)
+            {
+                return [.. _pressed.Select(KeyMap.Name)];
+            }
+        }
+    }
+
     public void Dispose() => ReleaseAll();
 
     private void EmitKey(User32.VK vk, bool keyUp)

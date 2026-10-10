@@ -104,6 +104,17 @@ internal sealed class PostMessageBackend : IInputBackend
         }
     }
 
+    public IReadOnlyList<string> PressedKeys
+    {
+        get
+        {
+            lock (_pressedLock)
+            {
+                return [.. _pressed.Select(KeyMap.Name)];
+            }
+        }
+    }
+
     public void Dispose()
     {
         ReleaseAll();

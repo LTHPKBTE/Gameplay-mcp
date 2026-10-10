@@ -27,4 +27,7 @@ public interface IInputBackend : IDisposable
 
     /// <summary>释放本通道按下但未松开的按键与鼠标键。</summary>
     void ReleaseAll();
+
+    /// <summary>本通道按下但未松开的键，按 <see cref="KeyMap"/> 的规范名给出。</summary>
+    IReadOnlyList<string> PressedKeys { get; }
 }

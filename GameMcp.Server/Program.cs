@@ -51,6 +51,7 @@ builder.Services.Configure<AnnotateOptions>(builder.Configuration.GetSection("An
 builder.Services.Configure<OverlayOptions>(builder.Configuration.GetSection("Overlay"));
 
 builder.Services.AddSingleton<IWindowService, WindowService>();
+builder.Services.AddSingleton(new HostState(elevation));
 builder.Services.AddSingleton<SessionService>();
 builder.Services.AddSingleton<ICaptureService>(sp => new CaptureService(
     sp.GetRequiredService<IWindowService>(),

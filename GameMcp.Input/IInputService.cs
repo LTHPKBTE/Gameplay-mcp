@@ -39,6 +39,9 @@ public interface IInputService : IDisposable
     /// <summary>急停期间有效的中断信号，供耗时操作提前退出。</summary>
     CancellationToken PanicToken { get; }
 
+    /// <summary>当前通道已按下但未松开的键；空表示没有残留按下状态。</summary>
+    IReadOnlyList<string> PressedKeys { get; }
+
     /// <summary>急停已触发时抛 <c>stopped_by_user</c>。</summary>
     void EnsureInputAllowed();
 

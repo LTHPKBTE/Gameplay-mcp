@@ -29,6 +29,9 @@ public static class KeyMap
         ['*'] = (User32.VK)0x6A,
     };
 
+    /// <summary>规范的鼠标键名，按 <c>VK_LBUTTON</c> 一族的取值排序。</summary>
+    private static readonly string[] MouseNames = ["mouseleft", "mouseright", "mousemiddle", "mousex1", "mousex2"];
+
     static KeyMap()
     {
         void Add(User32.VK vk, params string[] names)
@@ -193,6 +196,26 @@ public static class KeyMap
 
     /// <summary>判断该键是否属于鼠标键（<c>VK_LBUTTON</c> 一族的取值）。</summary>
     public static bool IsMouseKey(User32.VK vk) => (int)vk is >= 0x01 and <= 0x06;
+
+    /// <summary>虚拟键码 → 规范键名。查不到时给 <c>vk_0x…</c>。</summary>
+    public static string Name(User32.VK vk)
+    {
+        var value = (int)vk;
+        if (value is >= 0x01 and <= 0x06)
+        {
+            return MouseNames[value - 0x01];
+        }
+
+        foreach (var (name, candidate) in Named)
+        {
+            if (candidate == vk && name.Length > 1)
+            {
+                return name;
+            }
+        }
+
+        return $"vk_0x{value:X2}";
+    }
 
     private static string Normalize(string name)
     {

@@ -107,6 +107,22 @@ public sealed class InputService : IInputService
 
     public CancellationToken PanicToken => _panic.Token;
 
+    public IReadOnlyList<string> PressedKeys
+    {
+        get
+        {
+            lock (_gate)
+            {
+                if (_background is { } background && _foreground is { } foreground)
+                {
+                    return [.. background.PressedKeys, .. foreground.PressedKeys];
+                }
+
+                return _background?.PressedKeys ?? _foreground?.PressedKeys ?? [];
+            }
+        }
+    }
+
     public void EnsureInputAllowed()
     {
         if (_panic.IsTripped)
