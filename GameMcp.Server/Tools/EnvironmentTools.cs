@@ -52,19 +52,21 @@ public sealed class EnvironmentTools(
             return null;
         }
 
+        // session.Target 是绑定时的快照，前台、位置、最小化都会变，这里重新查一遍
+        var live = windows.Describe(target.Handle) ?? target;
         var client = windows.GetClientRectOnScreen(target.Handle);
 
         return new TargetInfo(
-            HandleText.Format(target.Handle),
-            target.Title,
-            target.ClassName,
-            target.WindowRect,
+            HandleText.Format(live.Handle),
+            live.Title,
+            live.ClassName,
+            live.WindowRect,
             client,
-            windows.GetDpi(target.Handle),
-            target.IsMinimized,
-            target.IsCloaked,
-            target.IsForeground,
-            target.IsTopMost);
+            windows.GetDpi(live.Handle),
+            live.IsMinimized,
+            live.IsCloaked,
+            live.IsForeground,
+            live.IsTopMost);
     }
 
     private CaptureState DescribeCapture()
