@@ -120,6 +120,11 @@ public sealed class WindowService : IWindowService
 
     public bool IsForeground(nint handle) => User32.GetForegroundWindow() == ToHandle(handle);
 
+    /// <summary>前台锁只约束「刚收到输入的那个进程」，锁通常很快释放，所以做有限次重试。</summary>
+    private const int FocusAttempts = 6;
+
+    private const int FocusRetryDelayMs = 60;
+
     public bool Focus(nint handle)
     {
         var hwnd = ToHandle(handle);
@@ -128,8 +133,23 @@ public sealed class WindowService : IWindowService
             User32.ShowWindow(hwnd, ShowWindowCommand.SW_RESTORE);
         }
 
-        User32.SetForegroundWindow(hwnd);
-        User32.BringWindowToTop(hwnd);
+        // 不再调 BringWindowToTop：SetForegroundWindow 成功时它已经完成置顶，
+        // 失败时它也无权越过前台锁定；而跨线程调用它会让内核向目标线程同步发
+        // WM_WINDOWPOSCHANGING，目标忙时调用方会永久阻塞。
+        for (var attempt = 0; attempt < FocusAttempts; attempt++)
+        {
+            if (attempt > 0)
+            {
+                Thread.Sleep(FocusRetryDelayMs);
+            }
+
+            User32.SetForegroundWindow(hwnd);
+            if (IsForeground(handle))
+            {
+                return true;
+            }
+        }
+
         return IsForeground(handle);
     }
 
