@@ -1,0 +1,36 @@
+## 构建产物
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+publish/
+
+## 本地包缓存（nuget.config 中启用 globalPackagesFolder 时使用）
+.packages/
+
+## IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.DotSettings.user
+.idea/
+
+## 运行期输出
+logs/
+*.log
+recordings/
+snapshots/
+
+## 模型权重
+*.onnx
+*.pt
+*.trt
+*.ctx
+Assets/Model/
+
+## 其他
+*.tmp
+*.bak
+Thumbs.db

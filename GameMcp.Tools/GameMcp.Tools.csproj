@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>GameMcp.Tools</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>GameMcp.Tools</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameMcp.Windowing\GameMcp.Windowing.csproj" />
+    <ProjectReference Include="..\GameMcp.Capture\GameMcp.Capture.csproj" />
+    <ProjectReference Include="..\GameMcp.Elevation\GameMcp.Elevation.csproj" />
+  </ItemGroup>
+
+</Project>

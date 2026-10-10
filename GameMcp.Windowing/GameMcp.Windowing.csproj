@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>GameMcp.Windowing</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vanara.PInvoke.User32" />
+    <PackageReference Include="Vanara.PInvoke.DwmApi" />
+    <PackageReference Include="Vanara.PInvoke.Gdi32" />
+    <PackageReference Include="Vanara.PInvoke.SHCore" />
+    <PackageReference Include="Vanara.Windows.Extensions" />
+  </ItemGroup>
+
+</Project>

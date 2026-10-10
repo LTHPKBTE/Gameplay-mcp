@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>GameMcp.Input</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vanara.PInvoke.User32" />
+    <ProjectReference Include="..\GameMcp.Windowing\GameMcp.Windowing.csproj" />
+    <ProjectReference Include="..\Fischless.WindowsInput\Fischless.WindowsInput.csproj" />
+    <ProjectReference Include="..\Fischless.HotkeyCapture\Fischless.HotkeyCapture.csproj" />
+  </ItemGroup>
+
+</Project>

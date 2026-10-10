@@ -1,0 +1,55 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="图像">
+    <PackageVersion Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+    <PackageVersion Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
+    <PackageVersion Include="System.Drawing.Common" Version="10.0.7" />
+  </ItemGroup>
+
+  <ItemGroup Label="图形">
+    <PackageVersion Include="SharpDX.Direct3D11" Version="4.2.0" />
+    <PackageVersion Include="SharpDX.D3DCompiler" Version="4.2.0" />
+    <PackageVersion Include="SharpDX.DirectInput" Version="4.2.0" />
+    <PackageVersion Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.122" />
+  </ItemGroup>
+
+  <ItemGroup Label="Win32">
+    <PackageVersion Include="Vanara.PInvoke.User32" Version="4.1.3" />
+    <PackageVersion Include="Vanara.PInvoke.DwmApi" Version="4.1.3" />
+    <PackageVersion Include="Vanara.PInvoke.Gdi32" Version="4.1.3" />
+    <PackageVersion Include="Vanara.PInvoke.SHCore" Version="4.1.3" />
+    <PackageVersion Include="Vanara.Windows.Extensions" Version="4.1.3" />
+  </ItemGroup>
+
+  <ItemGroup Label="推理">
+    <PackageVersion Include="Microsoft.ML.OnnxRuntime" Version="1.21.0" />
+    <PackageVersion Include="Microsoft.ML.OnnxRuntime.Managed" Version="1.21.0" />
+    <PackageVersion Include="Microsoft.ML.OnnxRuntime.DirectML" Version="1.21.0" />
+    <PackageVersion Include="YoloSharp" Version="6.0.3" />
+    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="MCP 与宿主">
+    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup Label="日志">
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="9.0.1" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="资产">
+    <PackageVersion Include="BetterGI.Assets.Model" Version="1.0.36" />
+    <PackageVersion Include="BetterGI.VCRuntime" Version="14.44.35208" />
+  </ItemGroup>
+
+</Project>

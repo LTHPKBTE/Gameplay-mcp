@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>GameMcp.Overlay</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
+    <ProjectReference Include="..\GameMcp.Windowing\GameMcp.Windowing.csproj" />
+  </ItemGroup>
+
+</Project>
