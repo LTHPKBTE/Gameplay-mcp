@@ -21,7 +21,12 @@ if (elevation.Outcome == ElevationOutcome.Relayed)
 
 args = ElevationOptions.StripRuntimeFlags(args);
 
-var builder = Host.CreateApplicationBuilder(args);
+// Host 默认拿当前工作目录当 content root，但宿主拉起的进程 cwd 不确定，配置必须跟着 exe 走
+var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory,
+});
 
 // stdout 只承载 JSON-RPC，日志一律走 stderr 与文件。
 Log.Logger = new LoggerConfiguration()
