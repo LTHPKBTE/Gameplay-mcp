@@ -238,7 +238,8 @@ internal sealed class PostMessageBackend : IInputBackend
 
     /// <summary>
     /// 目标非前台时补发 <c>WM_ACTIVATE</c>。<c>WM_ACTIVATE</c> 是顶层窗口专属通知，子控件不处理它，
-    /// 所以只在消息本身就投给顶层窗口（单窗口引擎应用）时才补。
+    /// 所以只在消息本身就投给顶层窗口（单窗口引擎应用）时才补。实测跨进程投递不改系统前景与 z 序，
+    /// 只让目标线程把焦点设到自己的输入控件。
     /// </summary>
     private void ActivateIfNeeded(nint target)
     {

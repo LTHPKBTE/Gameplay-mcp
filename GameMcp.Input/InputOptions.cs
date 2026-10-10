@@ -7,8 +7,9 @@ public sealed class InputOptions
     public KeySendMode KeySendMode { get; set; } = KeySendMode.VkScan;
 
     /// <summary>
-    /// 投递前是否补发一次激活提示。只对顶层窗口生效：单窗口引擎应用靠它判断自己是否被激活，
-    /// 子控件不处理 <c>WM_ACTIVATE</c>。它是启发式补丁，不构成真正的窗口激活。
+    /// 投递前是否补发一次激活提示，只对顶层窗口生效：单窗口引擎应用靠它判断自己是否被激活，
+    /// 子控件不处理 <c>WM_ACTIVATE</c>。实测跨进程投递时它不改系统前景与 z 序，只让目标线程
+    /// 把焦点设到自己的输入控件。
     /// </summary>
     public bool BackgroundActivateHint { get; set; } = true;
 
