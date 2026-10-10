@@ -55,3 +55,28 @@ public sealed record AttachResult
 
     public bool? IsMinimized { get; init; }
 }
+
+/// <summary>
+/// <c>get_state</c> 的返回。宽高是返回图的像素，<see cref="ScaleX"/> / <see cref="ScaleY"/>
+/// 是把返回图坐标还原成客户区物理像素用的除数。
+/// </summary>
+public sealed record StateResult
+{
+    public string? Error { get; init; }
+
+    public string? Message { get; init; }
+
+    public string? Hint { get; init; }
+
+    public int? Width { get; init; }
+
+    public int? Height { get; init; }
+
+    public double? ScaleX { get; init; }
+
+    public double? ScaleY { get; init; }
+
+    public string? Format { get; init; }
+
+    public bool? IsHdr { get; init; }
+}

@@ -47,6 +47,9 @@ builder.Services.Configure<OverlayOptions>(builder.Configuration.GetSection("Ove
 
 builder.Services.AddSingleton<IWindowService, WindowService>();
 builder.Services.AddSingleton<SessionService>();
+builder.Services.AddSingleton<ICaptureService>(sp => new CaptureService(
+    sp.GetRequiredService<IWindowService>(),
+    sp.GetRequiredService<IOptions<CaptureOptions>>().Value));
 builder.Services.AddSingleton<IInputService>(sp => new InputService(
     sp.GetRequiredService<IWindowService>(),
     sp.GetRequiredService<IOptions<InputOptions>>().Value));

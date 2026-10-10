@@ -40,7 +40,7 @@ public sealed class InputTools(
     }
 
     [McpServerTool(Name = "click_absolute", Destructive = true, UseStructuredContent = true)]
-    [Description("在指定坐标点击。坐标为 get_state 返回图的像素；也可用 index 指定元素（需有效的 snapshot_id）。")]
+    [Description("在指定坐标点击。坐标为 get_state 返回图的像素。")]
     public Task<InputActionResult> ClickAbsoluteAsync(
         [Description("x 坐标（返回图像素）")] int x,
         [Description("y 坐标（返回图像素）")] int y,
