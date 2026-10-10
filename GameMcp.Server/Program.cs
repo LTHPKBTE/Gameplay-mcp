@@ -3,6 +3,7 @@ using GameMcp.Capture;
 using GameMcp.Elevation;
 using GameMcp.Input;
 using GameMcp.Overlay;
+using GameMcp.Server;
 using GameMcp.Server.Services;
 using GameMcp.Windowing;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,7 +61,7 @@ builder.Services.AddSingleton<IInputService>(sp => new InputService(
     sp.GetRequiredService<IWindowService>(),
     sp.GetRequiredService<IOptions<InputOptions>>().Value));
 
-builder.Services.AddMcpServer()
+builder.Services.AddMcpServer(options => options.ServerInstructions = ServerInstructions.Text)
     .WithStdioServerTransport()
     .WithToolsFromAssembly();
 
