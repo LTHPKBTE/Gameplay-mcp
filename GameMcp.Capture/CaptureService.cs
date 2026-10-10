@@ -24,13 +24,22 @@ public sealed class CaptureService : ICaptureService
     {
         _windows = windows;
         _options = options;
+        Backend = options.Backend;
     }
 
     public bool IsAttached => _capture is { IsCapturing: true };
 
     public nint TargetHandle => _handle;
 
+    public CaptureBackend Backend { get; private set; }
+
     public bool IsHdrActive => _hdrProbe?.Invoke() == true;
+
+    public DisplayColor? DisplayColor { get; private set; }
+
+    public float? HdrScale { get; private set; }
+
+    public string? BackendNotice { get; private set; }
 
     public CaptureDiagnostics Diagnostics { get; } = new();
 
@@ -55,15 +64,20 @@ public sealed class CaptureService : ICaptureService
                 throw new InvalidOperationException("目标窗口已最小化，无法截图");
             }
 
-            var capture = CaptureBackendFactory.Create(_options.Backend);
+            var color = DisplayColorReader.Query(windowHandle);
+            var (backend, notice) = CaptureBackendFactory.Resolve(_options.Backend, color);
+
+            var hdrScale = CaptureBackendFactory.IsHdr(backend)
+                ? color?.SdrScale ?? DisplayColor.DefaultSdrScale
+                : (float?)null;
+
+            var capture = CaptureBackendFactory.Create(
+                backend, hdrScale is { } scale ? HdrToSdrShaderSource.Build(scale) : null);
             var settings = new Dictionary<string, object>
             {
                 ["MinUpdateIntervalMs"] = _options.MinUpdateIntervalMs,
                 ["UseCpuConvert"] = _options.UseCpuConvert,
                 ["DisableDrawWrite"] = _options.DisableDrawWrite,
-
-                // BitBlt 后端只在 settings 里带这个键时才启动
-                ["autoFixWin11BitBlt"] = _options.AutoFixWin11BitBlt,
             };
 
             try
@@ -72,7 +86,7 @@ public sealed class CaptureService : ICaptureService
 
                 if (!capture.IsCapturing)
                 {
-                    throw new InvalidOperationException($"{_options.Backend} 后端未启动");
+                    throw new InvalidOperationException($"{backend} 后端未启动");
                 }
             }
             catch
@@ -84,6 +98,10 @@ public sealed class CaptureService : ICaptureService
             _capture = capture;
             _hdrProbe = CaptureBackendFactory.HdrProbe(capture);
             _handle = windowHandle;
+            Backend = backend;
+            DisplayColor = color;
+            HdrScale = hdrScale;
+            BackendNotice = notice;
             Diagnostics.Reset();
         }
     }
@@ -153,6 +171,10 @@ public sealed class CaptureService : ICaptureService
         _capture = null;
         _hdrProbe = null;
         _handle = nint.Zero;
+        Backend = _options.Backend;
+        DisplayColor = null;
+        HdrScale = null;
+        BackendNotice = null;
     }
 
     private CaptureResult? Build(GameCaptureFrame frame)

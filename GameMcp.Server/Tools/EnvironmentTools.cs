@@ -75,9 +75,11 @@ public sealed class EnvironmentTools(
         var diagnostics = capture.Diagnostics;
 
         return new CaptureState(
-            options.Backend.ToString(),
+            capture.Backend.ToString(),
             capture.IsAttached,
             capture.IsHdrActive,
+            capture.HdrScale,
+            capture.BackendNotice,
             options.CanvasMax,
             options.Format.ToString().ToLowerInvariant(),
             options.WebPQuality,
@@ -165,6 +167,12 @@ public sealed record CaptureState(
     string Backend,
     bool Attached,
     bool IsHdrActive,
+
+    // HDR 后端交给着色器的曝光系数，非 HDR 后端为 null；是否真生效另看 IsHdrActive
+    float? HdrScale,
+
+    // 显示器状态与请求的后端矛盾时的提醒，如自动选择的原因
+    string? BackendNotice,
     int CanvasMax,
     string Format,
 

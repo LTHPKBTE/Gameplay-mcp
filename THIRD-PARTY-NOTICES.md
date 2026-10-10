@@ -13,7 +13,9 @@
 
 - 三个 `.csproj` 的包引用版本改由 `Directory.Packages.props` 集中管理；
 - `Fischless.GameCapture/Graphics/GraphicsCaptureV2.cs` 增加 `IsHdrActive`，暴露实际生效的 HDR 状态；
-- `Fischless.GameCapture/DwmSharedSurface/SharedSurfaceCapture.cs` 的 `Start` 中删去 `ShowWindow(SW_RESTORE)`，采集不再激活目标窗口。
+- `Fischless.GameCapture/Graphics/GraphicsCaptureV2.cs` 的构造函数增加可选参数 `hdrToSdrShader`，为空时用上游自带的 `HdrToSdrShader.Content`，非空时用调用方给的源码（本项目按显示器 SDR 白电平算出曝光系数后注入）。
+
+上游里的 `BitBlt`、`DWM SharedSurface`、WGC v1 三个采集实现本项目不接入，但保留原样、不删除也不修改。
 
 除 `Fischless.WindowsInput` 外，`Fischless.*` 在 BetterGI 仓库内以 GPL-3.0 分发，本项目的整体许可因此为 GPL-3.0。
 

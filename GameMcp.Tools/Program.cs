@@ -61,7 +61,7 @@ static int Usage()
         capture 选项:
           --handle 0x1234        目标窗口句柄
           --title <子串>         按标题子串选窗口（与 --handle 二选一）
-          --mode <名称>          采集后端，默认 GraphicsCapture
+          --mode <名称>          采集后端，默认 Auto（按显示器高级色彩状态选）
           --canvas 1920          基准画布长边，0 表示不缩放
           --format png|webp      落盘格式，默认 png
           --quality 90           WebP 质量

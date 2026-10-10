@@ -45,6 +45,7 @@ public partial class SharedSurfaceCapture : IGameCapture
     public void Start(nint hWnd, Dictionary<string, object>? settings = null)
     {
         _hWnd = hWnd;
+        User32.ShowWindow(hWnd, ShowWindowCommand.SW_RESTORE);
         (_region, _captureRect) = GetGameScreenInfo(hWnd);
         _d3dDevice = new Device(SharpDX.Direct3D.DriverType.Hardware, DeviceCreationFlags.BgraSupport); // Software/Hardware
 

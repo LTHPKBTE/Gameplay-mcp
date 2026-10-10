@@ -14,11 +14,9 @@ internal static class CaptureCommand
 
     public static int RunModes()
     {
-        foreach (var backend in Enum.GetValues<CaptureBackend>())
-        {
-            Console.WriteLine($"{backend}");
-        }
-
+        Console.WriteLine("Auto  按目标显示器的高级色彩状态在下面两个之间选（默认）");
+        Console.WriteLine("GraphicsCapture    8 位帧池，HDR 内容会被压白");
+        Console.WriteLine("GraphicsCaptureHdr 申请 FP16 表面并做 HDR→SDR，申请失败自动退回上面那个");
         return 0;
     }
 
@@ -43,7 +41,6 @@ internal static class CaptureCommand
 
         Console.WriteLine($"窗口        {HandleText.Format(handle)} {info.Title}");
         Console.WriteLine($"类名        {info.ClassName}");
-        Console.WriteLine($"捕获后端    {options.Backend}{(service.IsHdrActive ? "（HDR）" : string.Empty)}");
         Console.WriteLine($"客户区      {WindowCommand.Format(windows.GetClientRectOnScreen(handle))}（物理像素）");
         Console.WriteLine($"最小化      {info.IsMinimized}   DWM 遮蔽 {info.IsCloaked}");
 
@@ -60,6 +57,27 @@ internal static class CaptureCommand
         var baselineUser = GuiResources(process.Handle, GR_USEROBJECTS);
 
         service.Attach(handle);
+
+        // 必须在 Attach 之后：HDR 是否真生效要等帧池建好才知道，Attach 前探针还是空的
+        var resolved = service.Backend.ToString();
+        if (options.Backend != service.Backend)
+        {
+            resolved = $"{options.Backend} → {resolved}";
+        }
+
+        Console.WriteLine($"捕获后端    {resolved}{(service.IsHdrActive ? "（HDR）" : string.Empty)}");
+
+        if (service.DisplayColor is { } color)
+        {
+            Console.WriteLine(
+                $"显示器色彩  SDR 白电平 {color.SdrWhiteLevelNits:0.#} nit"
+                + (service.HdrScale is { } scale ? $"，HDR→SDR 系数 {scale:0.####}" : string.Empty));
+        }
+
+        if (service.BackendNotice is { } notice)
+        {
+            Console.WriteLine($"后端说明    {notice}");
+        }
 
         var started = Stopwatch.StartNew();
         var target = options.Count > 0
@@ -192,7 +210,7 @@ internal static class CaptureCommand
 
         public string? Title { get; private init; }
 
-        public CaptureBackend Backend { get; private init; } = CaptureBackend.GraphicsCapture;
+        public CaptureBackend Backend { get; private init; } = CaptureBackend.Auto;
 
         public int CanvasMax { get; private init; } = 1920;
 
@@ -222,7 +240,7 @@ internal static class CaptureCommand
         {
             nint? handle = null;
             string? title = null;
-            var backend = CaptureBackend.GraphicsCapture;
+            var backend = CaptureBackend.Auto;
             var canvas = 1920;
             var format = CaptureImageFormat.Png;
             var quality = 90;

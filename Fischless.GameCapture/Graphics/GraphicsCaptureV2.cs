@@ -17,7 +17,7 @@ using SharpDX.DXGI;
 
 namespace Fischless.GameCapture.Graphics;
 
-public class GraphicsCaptureV2(bool captureHdr = false) : IGameCapture
+public class GraphicsCaptureV2(bool captureHdr = false, string? hdrToSdrShader = null) : IGameCapture
 {
     // BGR Mat 池：有界 ConcurrentQueue，FIFO 回收
     private const int MaxPoolSize = 16;
@@ -347,7 +347,7 @@ public class GraphicsCaptureV2(bool captureHdr = false) : IGameCapture
         // V2 消费侧需要从输出纹理读原始字节打包：UNORM 资源 + 同格式显式视图（浮点往返精确还原字节）
         _hdrOutputTexture ??= Direct3D11Helper.CreateOutputTexture(device, width, height);
         _hdrOutputUav ??= new UnorderedAccessView(device, _hdrOutputTexture);
-        _hdrComputeShader ??= new ComputeShader(device, ShaderBytecode.Compile(HdrToSdrShader.Content, "CS_HDRtoSDR", "cs_5_0"));
+        _hdrComputeShader ??= new ComputeShader(device, ShaderBytecode.Compile(hdrToSdrShader ?? HdrToSdrShader.Content, "CS_HDRtoSDR", "cs_5_0"));
 
         using var inputSrv = new ShaderResourceView(device, hdrTexture);
 
